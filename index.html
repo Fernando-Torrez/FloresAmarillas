@@ -2,104 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Un Campo de Flores Amarillas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flores Amarillas — Para Ti</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --sky-1:#fff9e6;
-    --sky-2:#ffe7a3;
-    --sky-3:#ffd56b;
-    --hill-1:#a7db8f;
-    --hill-2:#8dcf79;
-    --hill-3:#77c566;
-    --stem:#2f9e44;
-    --leaf:#35a64a;
-    --petal:#ffda3a;
-    --petal-deep:#ffc400;
-    --center:#b58100;
+    --sky-a:#fff9e9; --sky-b:#ffe7ac; --sky-c:#ffd36a;
+    --grass-a:#6dd197; --grass-b:#55c883;
+    --stem:#2e9e44; --leaf:#37a64d;
+    --petal-a:#fff3a7; --petal-b:#ffd841; --petal-c:#ffc200;
+    --center:#b78100;
     --card-bg:rgba(255,255,255,.75);
-    --shadow:0 10px 28px rgba(0,0,0,.15);
+    --shadow:0 10px 28px rgba(0,0,0,.12);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0;
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    color:#3b3b3b;
+    margin:0; overflow:hidden;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:#3c3c3c;
     background:
-      radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.35) 0 40%, transparent 55%),
-      radial-gradient(800px 400px at 80% 15%, rgba(255,255,255,.25) 0 40%, transparent 60%),
-      linear-gradient(180deg,var(--sky-1),var(--sky-2) 45%, var(--sky-3) 95%);
-    overflow:hidden;
+      radial-gradient(1200px 600px at 20% 12%, rgba(255,255,255,.35) 0 40%, transparent 60%),
+      radial-gradient(900px 500px at 80% 18%, rgba(255,255,255,.25) 0 40%, transparent 60%),
+      linear-gradient(180deg,var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%);
   }
 
-  /* Bokeh suave (puntos de luz) */
-  .bokeh span{
-    position:absolute; border-radius:50%; filter:blur(2px); opacity:.25;
-    animation:float 18s ease-in-out infinite;
-  }
-  @keyframes float{
-    0%,100%{transform:translateY(0) translateX(0)}
-    50%{transform:translateY(-18px) translateX(8px)}
-  }
-
-  /* Tarjeta del mensaje */
+  /* Tarjeta */
   .card{
-    position:absolute; inset:24px auto auto 50%; transform:translateX(-50%);
-    max-width:min(720px,90vw); padding:22px 26px; text-align:center;
+    position:absolute; left:50%; top:20px; transform:translateX(-50%);
+    width:min(800px,92vw); padding:22px 26px; text-align:center;
     background:var(--card-bg); backdrop-filter:blur(6px);
-    border-radius:20px; box-shadow:var(--shadow);
-    animation:card-in .9s ease forwards; opacity:0;
+    border-radius:20px; box-shadow:var(--shadow); opacity:0; animation:fade-in .8s ease forwards .2s;
   }
-  @keyframes card-in{to{opacity:1; transform:translateX(-50%) translateY(0)}}
-  .title{
-    font-family:"Playfair Display",serif; font-weight:700; letter-spacing:.5px;
-    margin:0 0 6px; color:#5a3d1e; font-size:clamp(22px,4vw,34px);
-  }
-  .subtitle{margin:0; font-weight:400; font-size:clamp(14px,2.4vw,18px); color:#6c4b1f}
-  .note{margin:.65rem 0 0; font-size:clamp(12px,2vw,14px); color:#7a5a2b}
+  .title{font-family:"Playfair Display",serif; margin:0 0 6px; color:#5a3d1e; letter-spacing:.4px; font-weight:700; font-size:clamp(22px,4.2vw,36px)}
+  .subtitle{margin:0; font-weight:400; color:#6b4a1f; font-size:clamp(14px,2.5vw,18px)}
+  .note{margin:.6rem 0 0; font-size:clamp(12px,2.2vw,14px); color:#7a5a2b}
+  @keyframes fade-in{to{opacity:1}}
 
-  /* Escena SVG a pantalla completa */
-  .scene{
-    position:absolute; inset:0; width:100%; height:100%;
+  /* Colinas y pradera */
+  .hills{
+    position:absolute; inset:0; pointer-events:none;
   }
-  /* Colinas en capas (parallax sutil) */
-  .hill{ transform-origin:center; }
-  .hill-1{ fill:var(--hill-1); animation:parallax1 8s ease-in-out infinite }
-  .hill-2{ fill:var(--hill-2); animation:parallax2 9s ease-in-out infinite }
-  .hill-3{ fill:var(--hill-3); }
+  .hill{
+    position:absolute; left:-5vw; right:-5vw; height:36vh; bottom:20vh; border-radius:50%/100% 100% 0 0;
+    background:linear-gradient(180deg, #9cda89, #7bd27a 60%, #6bcf73);
+    filter:blur(0.7px); transform:translateZ(0);
+    animation:parallax1 8s ease-in-out infinite;
+  }
+  .hill:nth-child(2){
+    height:30vh; bottom:15vh; background:linear-gradient(180deg,#8bd07b,#6fcc6c 60%,#5dc563);
+    animation:parallax2 9s ease-in-out infinite;
+  }
   @keyframes parallax1{50%{transform:translateX(6px)}}
   @keyframes parallax2{50%{transform:translateX(-6px)}}
 
-  /* Flor (grupo) */
-  .flower{ transform-box:fill-box; transform-origin:50% 100%; }
-  /* Crecimiento del tallo */
-  .stem{
-    stroke:var(--stem); stroke-width:4; stroke-linecap:round; fill:none;
-    stroke-dasharray:160; stroke-dashoffset:160; animation:stem-grow 1.1s ease forwards;
+  /* Cesped base */
+  .meadow{
+    position:absolute; left:-2vw; right:-2vw; bottom:-2vh; height:28vh;
+    background:linear-gradient(180deg,var(--grass-a),var(--grass-b));
+    border-top-left-radius:50% 20vh; border-top-right-radius:50% 20vh;
+    box-shadow:inset 0 10px 20px rgba(0,0,0,.12);
   }
-  @keyframes stem-grow{to{stroke-dashoffset:0}}
-  /* Hojas */
-  .leaf{ fill:var(--leaf); transform-origin:50% 50%; opacity:0; animation:leaf-in .8s ease forwards .5s }
-  .leaf.r{ transform:rotate(14deg)}
-  .leaf.l{ transform:scaleX(-1) rotate(14deg)}
-  @keyframes leaf-in{to{opacity:1}}
-  /* Pétalos y centro */
-  .petal{ fill:url(#petalGradient); opacity:0; transform:scale(.2); transform-origin:50% 60%;
-    animation:bloom .6s cubic-bezier(.2,.7,.1,1) forwards .85s }
-  .center{ fill:var(--center); opacity:0; transform:scale(.2); transform-origin:center;
-    animation:bloom .55s ease-out forwards 1s }
-  @keyframes bloom{to{opacity:1; transform:scale(1)}}
-  /* Mecerse con el viento */
-  .sway{ animation:sway 3.6s ease-in-out infinite 1.2s; transform-origin:50% 100%; }
-  @keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
+  .meadow::after{ /* textura suave */
+    content:""; position:absolute; inset:0;
+    background:repeating-linear-gradient(160deg, rgba(255,255,255,.06) 0 6px, transparent 6px 14px);
+    opacity:.25; pointer-events:none;
+  }
 
-  /* Botón opcional para resembrar */
-  .actions{
-    position:absolute; right:16px; bottom:16px; display:flex; gap:10px; z-index:3;
+  /* Jardín */
+  .garden{ position:absolute; inset:0; pointer-events:none; }
+  .flower{
+    position:absolute; bottom:22vh; /* base sobre la pradera */
+    transform-origin:50% 100%;
+    will-change:transform, opacity;
+    animation:sway 3.8s ease-in-out infinite 1.2s;
   }
+  /* Tallo */
+  .stem{
+    position:absolute; left:50%; bottom:0; width:4px; transform:translateX(-50%);
+    height:0; background:linear-gradient(180deg, #2ea242, #278d3a);
+    border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.02) inset;
+    animation:grow-stem 900ms cubic-bezier(.2,.7,.1,1) forwards var(--delay,0s);
+    will-change:height;
+  }
+  @keyframes grow-stem{to{height:var(--h,140px)}}
+
+  /* Hojas */
+  .leaf{
+    position:absolute; width:26px; height:14px; background:radial-gradient(65% 100% at 40% 50%, #aaf2b9, var(--leaf));
+    border-radius:14px 14px 14px 2px; transform-origin:10% 50%; opacity:0;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.08);
+    animation:leaf-in 520ms ease forwards calc(var(--delay,0s) + .35s);
+  }
+  .leaf.l{ left:calc(50% - 22px); bottom:calc(var(--h,140px) * .45); transform:rotate(-18deg) }
+  .leaf.r{ left:calc(50% - 4px);  bottom:calc(var(--h,140px) * .62); transform:scaleX(-1) rotate(-14deg) }
+  @keyframes leaf-in{to{opacity:1}}
+
+  /* Cabeza de la flor */
+  .head{
+    position:absolute; left:50%; bottom:var(--h,140px); transform:translate(-50%, 0) scale(.2);
+    opacity:0; filter:drop-shadow(0 3px 2px rgba(0,0,0,.08));
+    animation:bloom 520ms cubic-bezier(.2,.8,.1,1) forwards calc(var(--delay,0s) + .58s);
+    will-change:transform,opacity;
+  }
+  @keyframes bloom{to{opacity:1; transform:translate(-50%, 0) scale(1)}}
+
+  .petal{
+    position:absolute; left:50%; top:50%; width:28px; height:42px; transform-origin:50% 90%;
+    background:radial-gradient(60% 70% at 50% 35%, var(--petal-a), var(--petal-b) 55%, var(--petal-c));
+    border-radius:18px 18px 10px 10px;
+  }
+  /* 8 pétalos rotados */
+  .p1{ transform:translate(-50%,-50%) rotate(0deg) }
+  .p2{ transform:translate(-50%,-50%) rotate(45deg) }
+  .p3{ transform:translate(-50%,-50%) rotate(90deg) }
+  .p4{ transform:translate(-50%,-50%) rotate(135deg) }
+  .p5{ transform:translate(-50%,-50%) rotate(180deg) }
+  .p6{ transform:translate(-50%,-50%) rotate(225deg) }
+  .p7{ transform:translate(-50%,-50%) rotate(270deg) }
+  .p8{ transform:translate(-50%,-50%) rotate(315deg) }
+
+  .center{
+    position:absolute; left:50%; top:50%; width:20px; height:20px;
+    background:radial-gradient(65% 65% at 40% 40%, #ffd57a, var(--center));
+    border-radius:50%; transform:translate(-50%,-50%);
+    box-shadow:inset 0 0 6px rgba(0,0,0,.15);
+  }
+
+  /* Mecerse con el viento (aplicado al contenedor .flower) */
+  @keyframes sway{
+    0%,100%{ transform:rotate(0deg) }
+    50%    { transform:rotate(2.2deg) }
+  }
+
+  /* Botón */
+  .actions{ position:absolute; right:16px; bottom:16px; z-index:3 }
   .btn{
     appearance:none; border:0; border-radius:14px; padding:10px 14px;
     background:#ffe08a; color:#4d3a1a; font-weight:600; cursor:pointer; box-shadow:var(--shadow);
@@ -108,146 +146,95 @@
   .btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(0,0,0,.18) }
   .btn:active{ transform:translateY(0) }
 
-  /* Accesibilidad movimiento reducido */
+  /* Accesibilidad */
   @media (prefers-reduced-motion:reduce){
-    .hill-1,.hill-2,.sway,.bokeh span{animation:none}
-    .stem,.leaf,.petal,.center{animation-duration:.01ms; animation-iteration-count:1}
+    .hill, .flower{animation:none}
+    .stem, .head, .leaf{animation-duration:.01ms; animation-iteration-count:1}
   }
 </style>
 </head>
 <body>
-  <!-- Bokeh de luz cálida -->
-  <div class="bokeh" aria-hidden="true"></div>
-
-  <!-- Mensaje romántico -->
   <section class="card" role="region" aria-label="Mensaje">
     <h1 class="title">Flores amarillas para ti</h1>
     <p class="subtitle">Aunque no pueda darte flores en persona, te envío este pequeño campo lleno de ellas.</p>
     <p class="note">Que cada una te recuerde lo mucho que iluminas mis días. 💛</p>
   </section>
 
-  <!-- Escena SVG -->
-  <svg class="scene" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- Colinas -->
-    <path class="hill hill-1" d="M0,700 C250,600 420,760 720,690 C1020,620 1180,760 1440,690 L1440,900 L0,900 Z"/>
-    <path class="hill hill-2" d="M0,740 C200,660 440,820 720,760 C1000,700 1200,820 1440,760 L1440,900 L0,900 Z"/>
-    <path class="hill hill-3" d="M0,780 C220,740 480,860 720,820 C960,780 1180,860 1440,820 L1440,900 L0,900 Z"/>
+  <div class="hills">
+    <div class="hill"></div>
+    <div class="hill"></div>
+  </div>
 
-    <!-- Gradiente de pétalo -->
-    <defs>
-      <radialGradient id="petalGradient" cx="50%" cy="45%" r="60%">
-        <stop offset="0%" stop-color="#fff2a6"/>
-        <stop offset="55%" stop-color="#ffda3a"/>
-        <stop offset="100%" stop-color="#ffc400"/>
-      </radialGradient>
-    </defs>
-
-    <!-- Contenedor de flores -->
-    <g id="garden"></g>
-  </svg>
+  <div class="meadow"></div>
+  <div class="garden" id="garden" aria-hidden="true"></div>
 
   <div class="actions">
     <button class="btn" id="reseed">Volver a hacerlas florecer ✨</button>
   </div>
 
 <script>
-/* Utilidades */
-const rand = (min, max) => Math.random() * (max - min) + min;
-const garden = document.getElementById('garden');
+  const garden = document.getElementById('garden');
+  const reseedBtn = document.getElementById('reseed');
 
-/* Bokeh cálido */
-(function makeBokeh(){
-  const layer = document.querySelector('.bokeh');
-  for(let i=0;i<12;i++){
-    const s = document.createElement('span');
-    const size = rand(18,42);
-    s.style.width = s.style.height = size + 'px';
-    s.style.left = rand(0,100) + 'vw';
-    s.style.top = rand(0,35) + 'vh';
-    s.style.background = 'rgba(255,240,180,.6)';
-    s.style.animationDelay = rand(0,8)+'s';
-    s.style.animationDuration = rand(14,22)+'s';
-    layer.appendChild(s);
-  }
-})();
+  // util
+  const rand = (a,b)=>Math.random()*(b-a)+a;
 
-/* Dibuja una flor (SVG) en x,y con escala y delays para la secuencia “nacer” */
-function drawFlower(x, y, scale=1, delay=0){
-  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-  g.setAttribute('class','flower sway');
-  g.setAttribute('transform', `translate(${x} ${y}) scale(${scale})`);
+  function plant(x, h, s, d){
+    const flower = document.createElement('div');
+    flower.className = 'flower';
+    flower.style.left = x + 'vw';
+    flower.style.setProperty('--h', h + 'px');
+    flower.style.setProperty('--delay', d + 's');
+    flower.style.animationDelay = (d + 0.9) + 's'; // el vaivén empieza tras florecer
+    flower.style.transform += ` scale(${s})`;
 
-  // Tallo (crece con trazo animado)
-  const stem = document.createElementNS('http://www.w3.org/2000/svg','path');
-  stem.setAttribute('class','stem');
-  // Curva sutil del tallo
-  stem.setAttribute('d','M0,0 C-6,-80 -4,-160 0,-220');
-  stem.style.animationDelay = `${delay}s`;
+    const stem = document.createElement('div');
+    stem.className = 'stem';
 
-  // Hojas
-  const leafL = document.createElementNS('http://www.w3.org/2000/svg','path');
-  leafL.setAttribute('class','leaf l');
-  leafL.setAttribute('d','M-8,-120 C-34,-132 -34,-154 -8,-166 C18,-154 18,-132 -8,-120 Z');
-  leafL.style.animationDelay = `${delay + 0.35}s`;
-  const leafR = document.createElementNS('http://www.w3.org/2000/svg','path');
-  leafR.setAttribute('class','leaf r');
-  leafR.setAttribute('d','M8,-160 C34,-172 34,-194 8,-206 C-18,-194 -18,-172 8,-160 Z');
-  leafR.style.animationDelay = `${delay + 0.42}s`;
+    const leafL = document.createElement('div');
+    leafL.className = 'leaf l';
+    const leafR = document.createElement('div');
+    leafR.className = 'leaf r';
 
-  // Corola: 8 pétalos alrededor del centro
-  const petalsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-  for(let i=0;i<8;i++){
-    const petal = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-    petal.setAttribute('class','petal');
-    petal.setAttribute('cx','0'); petal.setAttribute('cy','-235');
-    petal.setAttribute('rx','14'); petal.setAttribute('ry','26');
-    petal.setAttribute('transform',`rotate(${i*45})`);
-    petal.style.animationDelay = `${delay + 0.65 + i*0.03}s`;
-    petalsGroup.appendChild(petal);
-  }
-
-  // Centro
-  const center = document.createElementNS('http://www.w3.org/2000/svg','circle');
-  center.setAttribute('class','center');
-  center.setAttribute('cx','0'); center.setAttribute('cy','-235'); center.setAttribute('r','10');
-  center.style.animationDelay = `${delay + 0.9}s`;
-
-  g.appendChild(stem);
-  g.appendChild(leafL);
-  g.appendChild(leafR);
-  g.appendChild(petalsGroup);
-  g.appendChild(center);
-
-  garden.appendChild(g);
-}
-
-/* Siembra varias flores con distribución natural */
-function seedGarden(){
-  garden.innerHTML = ''; // limpiar
-  const width = 1440, height = 900;
-  // Bandas de profundidad (más lejos = más pequeñas y con más delay)
-  const bands = [
-    {yFrom:760, yTo:820, count:10, scale:[.7,.9]},
-    {yFrom:800, yTo:860, count:14, scale:[.85,1.05]},
-    {yFrom:820, yTo:880, count:18, scale:[1.0,1.25]},
-  ];
-  let i = 0;
-  bands.forEach(b=>{
-    for(let k=0;k<b.count;k++){
-      const x = rand(60, width-60);
-      const y = rand(b.yFrom, b.yTo);
-      const sc = rand(b.scale[0], b.scale[1]);
-      const delay = 0.12 * i; // nacen una tras otra
-      drawFlower(x, y, sc, delay);
-      i++;
+    const head = document.createElement('div');
+    head.className = 'head';
+    // pétalos
+    for(let i=1;i<=8;i++){
+      const p = document.createElement('div');
+      p.className = 'petal p'+i;
+      head.appendChild(p);
     }
-  });
-}
+    const center = document.createElement('div');
+    center.className = 'center';
+    head.appendChild(center);
 
-seedGarden();
+    flower.appendChild(stem);
+    flower.appendChild(leafL);
+    flower.appendChild(leafR);
+    flower.appendChild(head);
+    garden.appendChild(flower);
+  }
 
-/* Reseed button */
-document.getElementById('reseed').addEventListener('click', seedGarden);
+  function seed(){
+    garden.innerHTML = '';
+    // Menos flores = mejor rendimiento y animación más limpia
+    const COUNT = 26;
+    // Distribución horizontal natural (sin solapes bruscos)
+    const slots = Array.from({length:COUNT}, (_,i)=> (i+0.5)*(100/COUNT));
+    // Mezcla ligera
+    slots.sort(()=>Math.random()-.5);
+
+    for(let i=0;i<COUNT;i++){
+      const x = Math.min(98, Math.max(2, slots[i] + rand(-2,2)));
+      const height = rand(120, 170);         // alto de tallo
+      const scale  = rand(0.88, 1.12);       // variación sutil
+      const delay  = i * 0.12;               // nacen secuencialmente
+      plant(x, height, scale, delay);
+    }
+  }
+
+  seed();
+  reseedBtn.addEventListener('click', seed);
 </script>
 </body>
 </html>
