@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flores amarillas — Luz que cae del sol</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --gold:#ffd54f;      /* pétalo */
+      --sun:#ffb300;       /* centro */
+      --honey:#ffefc1;     /* papel */
+      --cream:#fff9e8;     /* fondo */
+      --ink:#3b3627;       /* texto */
+      --leaf:#6dbf57;      /* hoja */
+      --sky:#fff5cc;       /* brillo */
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      font-family:'Quicksand',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(60% 50% at 15% 8%, #fff7d6 0%, transparent 60%),
+        radial-gradient(40% 50% at 85% 5%, #fff2bf 0%, transparent 60%),
+        linear-gradient(180deg, var(--cream) 0%, #fff3c9 60%, #fffaf0 100%);
+      overflow-x:hidden;
+    }
+
+    /* Sol y destellos */
+    .sun{position:fixed; right:-90px; top:-90px; width:250px; height:250px; border-radius:50%; z-index:0;
+      background: radial-gradient(circle at 30% 30%, #fff6cf 0 28%, var(--gold) 29% 70%, var(--sun) 71% 100%);
+      box-shadow:0 0 140px 30px rgba(255,193,7,.35);
+    }
+    .sun::before{content:""; position:absolute; inset:-36px; border-radius:50%;
+      background:conic-gradient(from 0deg, rgba(255,193,7,0), rgba(255,193,7,.25) 16%, rgba(255,193,7,0) 32%, rgba(255,193,7,.25) 48%, rgba(255,193,7,0) 64%, rgba(255,193,7,.25) 80%, rgba(255,193,7,0) 100%);
+      animation:spin 14s linear infinite; mask: radial-gradient(circle, transparent 58%, #000 59%);
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .wrap{position:relative; z-index:1; min-height:100vh; display:grid; place-items:center; padding:28px 16px}
+
+    .canvas{
+      width:min(980px,94vw); border-radius:28px; background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
+      box-shadow:0 16px 50px rgba(255,193,7,.22); padding:28px 22px 22px; overflow:hidden;
+      transform:translateY(14px) scale(.985); opacity:0; animation:pop .9s cubic-bezier(.2,.8,.2,1) .2s forwards;
+    }
+    .canvas::before{content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(600px 120px at 50% -40px, rgba(255,235,130,.5), transparent 70%)}
+    @keyframes pop{to{transform:translateY(0) scale(1); opacity:1}}
+
+    .header{ text-align:center; margin:6px 0 12px}
+    .eyebrow{display:inline-block; padding:.35rem 1rem; border-radius:999px; background:#fff3bf; border:1px solid #ffe59a; color:#a36f00; font-weight:800; letter-spacing:.02em}
+    h1{font-family:'Playfair Display',serif; font-size:clamp(1.9rem, 2.8rem, 3.2rem); margin:12px 0 8px; color:#c07a00; line-height:1.18}
+    .subtitle{max-width:58ch; margin:0 auto; color:#6b5d3a}
+
+    /* Jardín */
+    .garden{ position:relative; margin:18px auto 10px; height:300px; max-width:860px; overflow:visible }
+    .stem{ position:absolute; bottom:0; width:6px; background:var(--leaf); border-radius:6px; transform-origin:bottom; animation:wobble 5s ease-in-out infinite }
+    .flower{ position:absolute; bottom:120px; left:50%; transform:translateX(-50%); filter:drop-shadow(0 6px 14px rgba(0,0,0,.08)) }
+    .center{ width:42px; height:42px; background:#6a4d1d; border-radius:50% }
+    .petal{ position:absolute; width:22px; height:22px; background:radial-gradient(circle at 30% 30%, #fffadc 0 35%, var(--gold) 36% 80%, var(--sun) 81% 100%); border-radius:58% 58% 46% 46% / 60% 60% 40% 40%; transform-origin:22px 22px }
+    @keyframes wobble{ 0%,100%{ transform:rotate(0deg)} 50%{ transform:rotate(2.2deg)}}
+
+    /* Lluvia de pétalos */
+    .fall{ position:fixed; top:-40px; width:14px; height:14px; pointer-events:none; z-index: 3; opacity:.95; will-change: transform }
+    .fall::before{ content:""; position:absolute; inset:0; background: radial-gradient(circle at 30% 30%, #fffadc 0 35%, var(--gold) 36% 80%, var(--sun) 81% 100%); border-radius: 58% 58% 46% 46% / 60% 60% 40% 40%; transform: rotate(45deg); filter: drop-shadow(0 2px 6px rgba(0,0,0,.08)); }
+
+    /* Versos */
+    .paper{ position:relative; margin:18px auto 4px; max-width:720px; background:linear-gradient(180deg,#fff 0%, var(--honey) 100%); border:1px solid #ffe59a; border-radius:20px; padding:22px 18px; box-shadow:var(--shadow) }
+    .paper p{ margin:.6rem 0; line-height:1.9 }
+    .paper em{ color:#c77800; font-style:normal; font-weight:800 }
+
+    /* Firma */
+    .foot{ text-align:center; margin: 16px 0 0; font-size:.95rem; color:#7a6a3c; opacity:.9 }
+
+    /* Botón de sorpresa */
+    .bar{ display:flex; justify-content:center; margin:8px 0 0 }
+    .btn{ border:0; padding:12px 20px; border-radius:999px; font-weight:800; cursor:pointer; background:linear-gradient(180deg,#ffe082 0%, #ffb300 100%); color:#3f2f00; box-shadow:0 10px 24px rgba(255,179,0,.32); transition:transform .1s ease, box-shadow .2s ease }
+    .btn:active{ transform:translateY(1px) scale(.99) }
+  </style>
+</head>
+<body>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="wrap">
+    <section class="canvas" aria-label="Flores amarillas">
+      <header class="header">
+        <span class="eyebrow">Día de las flores amarillas</span>
+        <h1>Un jardín de luz</h1>
+        <p class="subtitle">Cuando las flores amarillas aparecen, parece que el sol decide quedarse un rato más sobre la tierra.</p>
+      </header>
+
+      <!-- Jardín animado generado por JS -->
+      <div class="garden" id="garden" aria-hidden="true"></div>
+
+      <article class="paper">
+        <p>Hay días que huelen a <em>miel</em>, a pan recién horneado y a recuerdos que todavía brillan. En esos días, las flores amarillas no son sólo flores: son pequeñas constelaciones ancladas a los tallos.</p>
+        <p>Dicen que traen buena suerte, que ahuyentan sombras, que enseñan a mirar despacio. Tal vez porque el amarillo no grita: <em>alumbra</em>.</p>
+        <p>Si alguna vez dudas, mira un girasol: sabe encontrar al sol incluso cuando el cielo se esconde. Esa, quizá, sea la lección más amable de todas.</p>
+      </article>
+
+      <div class="bar"><button class="btn" id="bloom">Hacer florecer el día ✨</button></div>
+      <p class="foot">Hecho con cariño para celebrar lo sencillo · flores amarillas</p>
+    </section>
+  </div>
+
+  <script>
+    // Construye un pequeño jardín de flores amarillas
+    const garden = document.getElementById('garden');
+    const WIDTH = garden.clientWidth;
+    const HEIGHT = garden.clientHeight;
+
+    function createFlower(x){
+      const stem = document.createElement('div');
+      stem.className = 'stem';
+      const h = 90 + Math.random()*110; // altura del tallo
+      const w = 6;
+      stem.style.height = h + 'px';
+      stem.style.left = x + 'px';
+
+      const flower = document.createElement('div');
+      flower.className = 'flower';
+      flower.style.bottom = (h - 6) + 'px';
+
+      const center = document.createElement('div');
+      center.className = 'center';
+      flower.appendChild(center);
+
+      // pétalos alrededor (6-10)
+      const petals = 6 + Math.floor(Math.random()*5);
+      for(let i=0;i<petals;i++){
+        const p = document.createElement('div');
+        p.className = 'petal';
+        const angle = (360/petals) * i;
+        p.style.transform = `rotate(${angle}deg) translate(20px)`;
+        flower.appendChild(p);
+      }
+
+      stem.appendChild(flower);
+      garden.appendChild(stem);
+    }
+
+    // sembrar base
+    const count = Math.max(8, Math.floor(WIDTH/90));
+    for(let i=0;i<count;i++){
+      const x = 40 + Math.random()*(WIDTH-80);
+      createFlower(x);
+    }
+
+    // lluvia de pétalos
+    function petals(count = 24){
+      for(let i=0;i<count;i++){
+        const f = document.createElement('div');
+        f.className = 'fall';
+        const size = 10 + Math.random()*14;
+        f.style.width = f.style.height = size + 'px';
+        f.style.left = Math.random()*100 + 'vw';
+        const drift = (Math.random()*30 - 15).toFixed(2);
+        f.animate([
+          { transform:`translateY(-60px) rotate(0deg)`, opacity:.95 },
+          { transform:`translate(${drift}vw, 110vh) rotate(${120 + Math.random()*120}deg)`, opacity:0 }
+        ], { duration: 6000 + Math.random()*3000, easing:'cubic-bezier(.25,.6,.3,1)', delay: Math.random()*1000 });
+        document.body.appendChild(f);
+        setTimeout(()=> f.remove(), 10000);
+      }
+    }
+
+    // botón sorpresa
+    document.getElementById('bloom').addEventListener('click', ()=>{
+      petals(36);
+      // hacer brotar una nueva línea de flores
+      const row = 6 + Math.floor(Math.random()*6);
+      for(let i=0;i<row;i++){
+        const x = 20 + Math.random()*(garden.clientWidth-40);
+        createFlower(x);
+      }
+    });
+
+    // pétalos suaves al cargar
+    setTimeout(()=> petals(18), 700);
+  </script>
+</body>
+</html>
