@@ -72,6 +72,16 @@
       80% { opacity: 1; transform: scale(1.2); }
       100% { opacity: 1; transform: scale(1); }
     }
+
+    /* Animación viento */
+    .sway {
+      animation: sway 3s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      50% { transform: rotate(4deg) translateY(-4px); }
+    }
   </style>
 </head>
 <body>
@@ -82,7 +92,7 @@
 
   <script>
     const field = document.getElementById("field");
-    let totalFlores = 60; // cantidad de flores en el campo
+    let totalFlores = 60; // cantidad de flores
     let delay = 0;
 
     for (let i = 0; i < totalFlores; i++) {
@@ -91,7 +101,13 @@
       flower.innerHTML = "🌼";
       flower.style.fontSize = (Math.random() * 1.5 + 1.2) + "rem";
       flower.style.animationDelay = delay + "s";
-      delay += 0.2; // cada flor nace con un pequeño retraso
+      delay += 0.2;
+
+      // cuando termina de "nacer", que empiece a moverse
+      flower.addEventListener("animationend", () => {
+        flower.classList.add("sway");
+      });
+
       field.appendChild(flower);
     }
   </script>
