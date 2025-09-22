@@ -62,14 +62,14 @@
     .flower {
       font-size: 2rem;
       margin: 5px;
-      opacity: 0;
-      transform: scale(0);
+      opacity: 0.2; /* que se vean aunque estén chiquitas */
+      transform: scale(0.1);
       animation: grow 1s forwards;
     }
 
     @keyframes grow {
-      0% { opacity: 0; transform: scale(0); }
-      80% { opacity: 1; transform: scale(1.2); }
+      0%   { opacity: 0.2; transform: scale(0.1); }
+      80%  { opacity: 1; transform: scale(1.2); }
       100% { opacity: 1; transform: scale(1); }
     }
 
@@ -99,11 +99,15 @@
       const flower = document.createElement("div");
       flower.classList.add("flower");
       flower.innerHTML = "🌼";
-      flower.style.fontSize = (Math.random() * 1.5 + 1.2) + "rem";
-      flower.style.animationDelay = delay + "s";
-      delay += 0.2;
 
-      // cuando termina de "nacer", que empiece a moverse
+      // tamaño aleatorio
+      flower.style.fontSize = (Math.random() * 1.5 + 1.2) + "rem";
+
+      // cada flor nace con un pequeño retraso
+      flower.style.animationDelay = delay + "s";
+      delay += 0.15;
+
+      // cuando termina de nacer, empieza a moverse con el viento
       flower.addEventListener("animationend", () => {
         flower.classList.add("sway");
       });
