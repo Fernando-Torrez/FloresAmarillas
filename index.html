@@ -1,119 +1,253 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campo de Flores Amarillas 🌼</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100vh;
-      background: linear-gradient(to top, #f9e79f, #fff9e6);
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Un Campo de Flores Amarillas</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-1:#fff9e6;
+    --sky-2:#ffe7a3;
+    --sky-3:#ffd56b;
+    --hill-1:#a7db8f;
+    --hill-2:#8dcf79;
+    --hill-3:#77c566;
+    --stem:#2f9e44;
+    --leaf:#35a64a;
+    --petal:#ffda3a;
+    --petal-deep:#ffc400;
+    --center:#b58100;
+    --card-bg:rgba(255,255,255,.75);
+    --shadow:0 10px 28px rgba(0,0,0,.15);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:#3b3b3b;
+    background:
+      radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.35) 0 40%, transparent 55%),
+      radial-gradient(800px 400px at 80% 15%, rgba(255,255,255,.25) 0 40%, transparent 60%),
+      linear-gradient(180deg,var(--sky-1),var(--sky-2) 45%, var(--sky-3) 95%);
+    overflow:hidden;
+  }
 
-    h1 {
-      margin-top: 30px;
-      font-size: 2rem;
-      text-align: center;
-      color: #5a3d1e;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 12px 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      z-index: 10;
-      animation: fadeIn 2s ease forwards;
-      opacity: 0;
-    }
+  /* Bokeh suave (puntos de luz) */
+  .bokeh span{
+    position:absolute; border-radius:50%; filter:blur(2px); opacity:.25;
+    animation:float 18s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0) translateX(0)}
+    50%{transform:translateY(-18px) translateX(8px)}
+  }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+  /* Tarjeta del mensaje */
+  .card{
+    position:absolute; inset:24px auto auto 50%; transform:translateX(-50%);
+    max-width:min(720px,90vw); padding:22px 26px; text-align:center;
+    background:var(--card-bg); backdrop-filter:blur(6px);
+    border-radius:20px; box-shadow:var(--shadow);
+    animation:card-in .9s ease forwards; opacity:0;
+  }
+  @keyframes card-in{to{opacity:1; transform:translateX(-50%) translateY(0)}}
+  .title{
+    font-family:"Playfair Display",serif; font-weight:700; letter-spacing:.5px;
+    margin:0 0 6px; color:#5a3d1e; font-size:clamp(22px,4vw,34px);
+  }
+  .subtitle{margin:0; font-weight:400; font-size:clamp(14px,2.4vw,18px); color:#6c4b1f}
+  .note{margin:.65rem 0 0; font-size:clamp(12px,2vw,14px); color:#7a5a2b}
 
-    .grass {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 160px;
-      background: linear-gradient(to top, #229954, #58d68d);
-      border-top-left-radius: 30% 20px;
-      border-top-right-radius: 30% 20px;
-      z-index: 1;
-    }
+  /* Escena SVG a pantalla completa */
+  .scene{
+    position:absolute; inset:0; width:100%; height:100%;
+  }
+  /* Colinas en capas (parallax sutil) */
+  .hill{ transform-origin:center; }
+  .hill-1{ fill:var(--hill-1); animation:parallax1 8s ease-in-out infinite }
+  .hill-2{ fill:var(--hill-2); animation:parallax2 9s ease-in-out infinite }
+  .hill-3{ fill:var(--hill-3); }
+  @keyframes parallax1{50%{transform:translateX(6px)}}
+  @keyframes parallax2{50%{transform:translateX(-6px)}}
 
-    .field {
-      position: absolute;
-      bottom: 160px;
-      width: 100%;
-      height: calc(100% - 220px);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-end;
-      z-index: 2;
-      padding: 10px;
-    }
+  /* Flor (grupo) */
+  .flower{ transform-box:fill-box; transform-origin:50% 100%; }
+  /* Crecimiento del tallo */
+  .stem{
+    stroke:var(--stem); stroke-width:4; stroke-linecap:round; fill:none;
+    stroke-dasharray:160; stroke-dashoffset:160; animation:stem-grow 1.1s ease forwards;
+  }
+  @keyframes stem-grow{to{stroke-dashoffset:0}}
+  /* Hojas */
+  .leaf{ fill:var(--leaf); transform-origin:50% 50%; opacity:0; animation:leaf-in .8s ease forwards .5s }
+  .leaf.r{ transform:rotate(14deg)}
+  .leaf.l{ transform:scaleX(-1) rotate(14deg)}
+  @keyframes leaf-in{to{opacity:1}}
+  /* Pétalos y centro */
+  .petal{ fill:url(#petalGradient); opacity:0; transform:scale(.2); transform-origin:50% 60%;
+    animation:bloom .6s cubic-bezier(.2,.7,.1,1) forwards .85s }
+  .center{ fill:var(--center); opacity:0; transform:scale(.2); transform-origin:center;
+    animation:bloom .55s ease-out forwards 1s }
+  @keyframes bloom{to{opacity:1; transform:scale(1)}}
+  /* Mecerse con el viento */
+  .sway{ animation:sway 3.6s ease-in-out infinite 1.2s; transform-origin:50% 100%; }
+  @keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
 
-    .flower {
-      font-size: 2rem;
-      margin: 5px;
-      opacity: 0.2; /* que se vean aunque estén chiquitas */
-      transform: scale(0.1);
-      animation: grow 1s forwards;
-    }
+  /* Botón opcional para resembrar */
+  .actions{
+    position:absolute; right:16px; bottom:16px; display:flex; gap:10px; z-index:3;
+  }
+  .btn{
+    appearance:none; border:0; border-radius:14px; padding:10px 14px;
+    background:#ffe08a; color:#4d3a1a; font-weight:600; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(0,0,0,.18) }
+  .btn:active{ transform:translateY(0) }
 
-    @keyframes grow {
-      0%   { opacity: 0.2; transform: scale(0.1); }
-      80%  { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    /* Animación viento */
-    .sway {
-      animation: sway 3s ease-in-out infinite;
-    }
-
-    @keyframes sway {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      50% { transform: rotate(4deg) translateY(-4px); }
-    }
-  </style>
+  /* Accesibilidad movimiento reducido */
+  @media (prefers-reduced-motion:reduce){
+    .hill-1,.hill-2,.sway,.bokeh span{animation:none}
+    .stem,.leaf,.petal,.center{animation-duration:.01ms; animation-iteration-count:1}
+  }
+</style>
 </head>
 <body>
-  <h1>🌼 Aunque no pueda darte flores en persona,<br>te envío este pequeño campo lleno de ellas 💛</h1>
+  <!-- Bokeh de luz cálida -->
+  <div class="bokeh" aria-hidden="true"></div>
 
-  <div class="field" id="field"></div>
-  <div class="grass"></div>
+  <!-- Mensaje romántico -->
+  <section class="card" role="region" aria-label="Mensaje">
+    <h1 class="title">Flores amarillas para ti</h1>
+    <p class="subtitle">Aunque no pueda darte flores en persona, te envío este pequeño campo lleno de ellas.</p>
+    <p class="note">Que cada una te recuerde lo mucho que iluminas mis días. 💛</p>
+  </section>
 
-  <script>
-    const field = document.getElementById("field");
-    let totalFlores = 60; // cantidad de flores
-    let delay = 0;
+  <!-- Escena SVG -->
+  <svg class="scene" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Colinas -->
+    <path class="hill hill-1" d="M0,700 C250,600 420,760 720,690 C1020,620 1180,760 1440,690 L1440,900 L0,900 Z"/>
+    <path class="hill hill-2" d="M0,740 C200,660 440,820 720,760 C1000,700 1200,820 1440,760 L1440,900 L0,900 Z"/>
+    <path class="hill hill-3" d="M0,780 C220,740 480,860 720,820 C960,780 1180,860 1440,820 L1440,900 L0,900 Z"/>
 
-    for (let i = 0; i < totalFlores; i++) {
-      const flower = document.createElement("div");
-      flower.classList.add("flower");
-      flower.innerHTML = "🌼";
+    <!-- Gradiente de pétalo -->
+    <defs>
+      <radialGradient id="petalGradient" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="#fff2a6"/>
+        <stop offset="55%" stop-color="#ffda3a"/>
+        <stop offset="100%" stop-color="#ffc400"/>
+      </radialGradient>
+    </defs>
 
-      // tamaño aleatorio
-      flower.style.fontSize = (Math.random() * 1.5 + 1.2) + "rem";
+    <!-- Contenedor de flores -->
+    <g id="garden"></g>
+  </svg>
 
-      // cada flor nace con un pequeño retraso
-      flower.style.animationDelay = delay + "s";
-      delay += 0.15;
+  <div class="actions">
+    <button class="btn" id="reseed">Volver a hacerlas florecer ✨</button>
+  </div>
 
-      // cuando termina de nacer, empieza a moverse con el viento
-      flower.addEventListener("animationend", () => {
-        flower.classList.add("sway");
-      });
+<script>
+/* Utilidades */
+const rand = (min, max) => Math.random() * (max - min) + min;
+const garden = document.getElementById('garden');
 
-      field.appendChild(flower);
+/* Bokeh cálido */
+(function makeBokeh(){
+  const layer = document.querySelector('.bokeh');
+  for(let i=0;i<12;i++){
+    const s = document.createElement('span');
+    const size = rand(18,42);
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = rand(0,100) + 'vw';
+    s.style.top = rand(0,35) + 'vh';
+    s.style.background = 'rgba(255,240,180,.6)';
+    s.style.animationDelay = rand(0,8)+'s';
+    s.style.animationDuration = rand(14,22)+'s';
+    layer.appendChild(s);
+  }
+})();
+
+/* Dibuja una flor (SVG) en x,y con escala y delays para la secuencia “nacer” */
+function drawFlower(x, y, scale=1, delay=0){
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','flower sway');
+  g.setAttribute('transform', `translate(${x} ${y}) scale(${scale})`);
+
+  // Tallo (crece con trazo animado)
+  const stem = document.createElementNS('http://www.w3.org/2000/svg','path');
+  stem.setAttribute('class','stem');
+  // Curva sutil del tallo
+  stem.setAttribute('d','M0,0 C-6,-80 -4,-160 0,-220');
+  stem.style.animationDelay = `${delay}s`;
+
+  // Hojas
+  const leafL = document.createElementNS('http://www.w3.org/2000/svg','path');
+  leafL.setAttribute('class','leaf l');
+  leafL.setAttribute('d','M-8,-120 C-34,-132 -34,-154 -8,-166 C18,-154 18,-132 -8,-120 Z');
+  leafL.style.animationDelay = `${delay + 0.35}s`;
+  const leafR = document.createElementNS('http://www.w3.org/2000/svg','path');
+  leafR.setAttribute('class','leaf r');
+  leafR.setAttribute('d','M8,-160 C34,-172 34,-194 8,-206 C-18,-194 -18,-172 8,-160 Z');
+  leafR.style.animationDelay = `${delay + 0.42}s`;
+
+  // Corola: 8 pétalos alrededor del centro
+  const petalsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  for(let i=0;i<8;i++){
+    const petal = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    petal.setAttribute('class','petal');
+    petal.setAttribute('cx','0'); petal.setAttribute('cy','-235');
+    petal.setAttribute('rx','14'); petal.setAttribute('ry','26');
+    petal.setAttribute('transform',`rotate(${i*45})`);
+    petal.style.animationDelay = `${delay + 0.65 + i*0.03}s`;
+    petalsGroup.appendChild(petal);
+  }
+
+  // Centro
+  const center = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  center.setAttribute('class','center');
+  center.setAttribute('cx','0'); center.setAttribute('cy','-235'); center.setAttribute('r','10');
+  center.style.animationDelay = `${delay + 0.9}s`;
+
+  g.appendChild(stem);
+  g.appendChild(leafL);
+  g.appendChild(leafR);
+  g.appendChild(petalsGroup);
+  g.appendChild(center);
+
+  garden.appendChild(g);
+}
+
+/* Siembra varias flores con distribución natural */
+function seedGarden(){
+  garden.innerHTML = ''; // limpiar
+  const width = 1440, height = 900;
+  // Bandas de profundidad (más lejos = más pequeñas y con más delay)
+  const bands = [
+    {yFrom:760, yTo:820, count:10, scale:[.7,.9]},
+    {yFrom:800, yTo:860, count:14, scale:[.85,1.05]},
+    {yFrom:820, yTo:880, count:18, scale:[1.0,1.25]},
+  ];
+  let i = 0;
+  bands.forEach(b=>{
+    for(let k=0;k<b.count;k++){
+      const x = rand(60, width-60);
+      const y = rand(b.yFrom, b.yTo);
+      const sc = rand(b.scale[0], b.scale[1]);
+      const delay = 0.12 * i; // nacen una tras otra
+      drawFlower(x, y, sc, delay);
+      i++;
     }
-  </script>
+  });
+}
+
+seedGarden();
+
+/* Reseed button */
+document.getElementById('reseed').addEventListener('click', seedGarden);
+</script>
 </body>
 </html>
