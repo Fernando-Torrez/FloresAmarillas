@@ -1,327 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Campo de flores amarillas — brillas en la noche</title>
-
-  <!-- Fuentes elegantes -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- GSAP y Three.js desde CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día de las Flores Amarillas 🌼</title>
   <style>
-    :root{
-      --bg1:#04050a; --bg2:#02030a; --cap:#060915; --text:#eaf0ff; --muted:#b7c2dd; --accent:#ffd66e;
-      --gold1:#fff6c7; --gold2:#ffe48f; --gold3:#ffd04a; --gold4:#ffb300;
-      --seedTop:#8b5a2b; --seedLow:#332312; --leaf1:#7ad674; --leaf2:#49b262;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; overflow:hidden; color:var(--text);
-      font-family:'Quicksand',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(85% 55% at 50% 0%, var(--cap) 0%, transparent 70%),
-        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(120deg, #fff9e6, #ffe066, #ffd43b);
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    /* Cielo WebGL detrás de todo */
-    #scene{ position:fixed; inset:0; z-index:-1 }
-
-    header{
-      position:fixed; top:24px; left:50%; transform:translateX(-50%);
-      width:min(960px,92vw); text-align:center; z-index:5;
-    }
-    h1{
-      margin:0; font-family:'Playfair Display',serif;
-      font-size:clamp(1.6rem,3.2vw,2.6rem); letter-spacing:.2px;
-    }
-    .subtitle{ margin:10px auto 0; max-width:72ch; color:var(--muted) }
-
-    .stage{ position:fixed; inset:0; display:grid; place-items:end center; padding-bottom:5vh; z-index:2 }
-    svg{ width:min(1400px,96vw); height:min(78vh,80vw); overflow:visible }
-
-    .ground-fog{
-      position:fixed; left:0; right:0; bottom:0; height:42vh; z-index:1;
-      background: radial-gradient(100% 70% at 50% 100%, rgba(10,16,32,.9) 0%, rgba(10,16,32,0) 70%);
-      filter: blur(8px);
-      pointer-events:none;
-    }
-    footer{
-      position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
-      z-index:5; color:#cfd8ff; opacity:.85; font-size:.95rem;
+    h1 {
+      font-size: 3rem;
+      color: #4d3319;
+      text-align: center;
+      animation: fadeIn 3s ease forwards;
+      opacity: 0;
     }
 
-    /* Estrella fugaz DOM */
-    .meteor{
-      position:fixed; left:-10vw; top:-10vh; width:2px; height:2px; background:#fff; border-radius:50%;
-      box-shadow:0 0 10px 3px #fff, 0 0 20px 8px rgba(255,255,255,.55);
-      z-index:10; opacity:.95;
+    h2 {
+      font-size: 1.5rem;
+      color: #704214;
+      margin-top: 10px;
+      animation: fadeIn 4s ease forwards;
+      opacity: 0;
     }
-    .meteor::after{
-      content:""; position:absolute; right:2px; top:0; height:2px; width:200px;
-      background:linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.16), rgba(255,255,255,0));
-      transform:skewX(-12deg); filter:blur(1px);
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .btn {
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: #ffda44;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .btn:hover {
+      transform: scale(1.1);
+      background: #ffd633;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Flores animadas cayendo */
+    .flower {
+      position: absolute;
+      top: -10vh;
+      font-size: 1.5rem;
+      color: #ffcc00;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
 <body>
-  <!-- Cielo 3D -->
-  <div id="scene" aria-hidden="true"></div>
-
-  <!-- Frase -->
-  <header>
-    <h1>Un campo de flores que nace para ti — y tú brillas como el amarillo en la noche</h1>
-    <p class="subtitle">
-      No puedo llevarte flores en persona; por eso te regalo este
-      <span style="font-weight:700;color:var(--accent)">campo que nace</span>.
-      En el cielo oscuro, tu luz amarilla lo enciende todo.
-    </p>
-  </header>
-
-  <!-- Campo -->
-  <main class="stage" aria-label="Campo de flores amarillas naciendo">
-    <svg id="bouquet" viewBox="0 0 1000 700" role="img" aria-labelledby="tit desc">
-      <title id="tit">Campo de flores amarillas</title>
-      <desc id="desc">Un campo que crece en capas: tallos se dibujan, hojas brotan y pétalos se abren con suavidad.</desc>
-
-      <defs>
-        <!-- Gradientes pétalos, centros y tallos -->
-        <radialGradient id="petalGrad" cx="30%" cy="30%" r="70%">
-          <stop offset="0%"  stop-color="var(--gold1)"/>
-          <stop offset="52%" stop-color="var(--gold2)"/>
-          <stop offset="86%" stop-color="var(--gold3)"/>
-          <stop offset="100%" stop-color="var(--gold4)"/>
-        </radialGradient>
-        <radialGradient id="centerGrad" cx="50%" cy="45%" r="60%">
-          <stop offset="0%"  stop-color="var(--seedTop)"/>
-          <stop offset="100%" stop-color="var(--seedLow)"/>
-        </radialGradient>
-        <linearGradient id="stemGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="var(--leaf1)"/>
-          <stop offset="100%" stop-color="var(--leaf2)"/>
-        </linearGradient>
-
-        <!-- Sombra suave opcional -->
-        <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".35"/>
-        </filter>
-      </defs>
-      <!-- Las flores se generan con JS -->
-    </svg>
-  </main>
-
-  <!-- Niebla de suelo -->
-  <div class="ground-fog" aria-hidden="true"></div>
-
-  <footer>Hecho con cariño bajo un cielo de estrellas ✨</footer>
+  <h1>🌼 Feliz Día de las Flores Amarillas 🌼</h1>
+  <h2>Que este día esté lleno de alegría y amor</h2>
+  <button class="btn">Regalar una flor 💛</button>
 
   <script>
-    // ========= Esperar a que carguen las libs (gsap y THREE) =========
-    window.addEventListener('load', () => {
-      // ---------- Fondo 3D de estrellas (Three.js) ----------
-      (function initStars(){
-        const container = document.getElementById('scene');
-        const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
+    // Generar flores cayendo
+    function createFlower() {
+      const flower = document.createElement('div');
+      flower.classList.add('flower');
+      flower.innerHTML = '🌼';
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
-        camera.position.z = 5;
+      flower.style.left = Math.random() * 100 + 'vw';
+      flower.style.animationDuration = (Math.random() * 3 + 4) + 's';
 
-        const starCount = 1600;
-        const positions = new Float32Array(starCount * 3);
-        for(let i=0;i<starCount;i++){
-          const r = 38 * Math.random() + 6;
-          const th = Math.random() * Math.PI * 2;
-          const ph = Math.acos(2*Math.random()-1);
-          positions[i*3+0] = r * Math.sin(ph) * Math.cos(th);
-          positions[i*3+1] = r * Math.sin(ph) * Math.sin(th);
-          positions[i*3+2] = r * Math.cos(ph);
-        }
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const mat = new THREE.PointsMaterial({ color:0xffffff, size:0.02, transparent:true, opacity:0.85 });
-        const stars = new THREE.Points(geo, mat);
-        scene.add(stars);
+      document.body.appendChild(flower);
 
-        function onResize(){
-          const w = container.clientWidth || window.innerWidth;
-          const h = container.clientHeight || window.innerHeight;
-          renderer.setSize(w,h);
-          camera.aspect = w/h; camera.updateProjectionMatrix();
-        }
-        window.addEventListener('resize', onResize); onResize();
+      setTimeout(() => {
+        flower.remove();
+      }, 7000);
+    }
 
-        (function loop(){
-          stars.rotation.y += 0.0005;
-          stars.rotation.x += 0.00025;
-          renderer.render(scene, camera);
-          requestAnimationFrame(loop);
-        })();
-      })();
+    setInterval(createFlower, 400);
 
-      // ---------- Estrella fugaz DOM (GSAP) ----------
-      (function meteors(){
-        function spawnMeteor(){
-          const m = document.createElement('div');
-          m.className = 'meteor';
-          document.body.appendChild(m);
-          const sx = -10 + Math.random()*10;
-          const sy = 5 + Math.random()*22;
-          m.style.left = sx + 'vw';
-          m.style.top  = sy + 'vh';
-          gsap.fromTo(m,{ x:0, y:0, opacity:.95 },{ x:'120vw', y:'85vh', opacity:0, duration:2.3, ease:'power2.out', onComplete:()=> m.remove() });
-        }
-        setTimeout(spawnMeteor, 1600);
-        setInterval(()=>{ if(Math.random()>0.6) spawnMeteor(); }, 10000);
-      })();
-
-      // ---------- Campo de flores SVG (GSAP) ----------
-      const svg = document.getElementById('bouquet');
-      const NS  = 'http://www.w3.org/2000/svg';
-
-      function petalPath(R=18, L=54){
-        return `M 0 0 C ${R} ${-L*0.25}, ${R*0.78} ${-L*0.82}, 0 ${-L} C ${-R*0.78} ${-L*0.82}, ${-R} ${-L*0.25}, 0 0 Z`;
-      }
-      function prepStroke(path){
-        const L = path.getTotalLength();
-        path.style.strokeDasharray  = L;
-        path.style.strokeDashoffset = L;
-        return L;
-      }
-      function seedDots(group, n=14){
-        for(let i=0;i<n;i++){
-          const a = Math.random()*Math.PI*2;
-          const r = 5 + Math.random()*9;
-          const cx = Math.cos(a)*r, cy = Math.sin(a)*r;
-          const d = document.createElementNS(NS,'circle');
-          d.setAttribute('cx', cx); d.setAttribute('cy', cy);
-          d.setAttribute('r', 1.2); d.setAttribute('fill', '#2a1b0b');
-          group.appendChild(d);
-        }
-      }
-
-      function createFlower(x, yBase, scale=1, blur=0, delay=0){
-        const g = document.createElementNS(NS,'g');
-        g.setAttribute('transform', `translate(${x},${yBase}) scale(${scale})`);
-        if(blur) g.style.filter = `blur(${blur}px)`;
-        svg.appendChild(g);
-
-        const h = 170 + Math.random()*90;
-        const sway = (Math.random()*36 - 18).toFixed(1);
-
-        // Halo dorado suave
-        const haloG = document.createElementNS(NS,'g');
-        haloG.setAttribute('opacity','0.22');
-        const halo1 = document.createElementNS(NS,'circle');
-        halo1.setAttribute('cx',0); halo1.setAttribute('cy',-h); halo1.setAttribute('r',44);
-        halo1.setAttribute('fill','#ffdf80'); haloG.appendChild(halo1);
-        const halo2 = document.createElementNS(NS,'circle');
-        halo2.setAttribute('cx',0); halo2.setAttribute('cy',-h); halo2.setAttribute('r',72);
-        halo2.setAttribute('fill','#ffdf80'); halo2.setAttribute('opacity','.22'); haloG.appendChild(halo2);
-        g.appendChild(haloG);
-
-        // Tallo
-        const stem = document.createElementNS(NS,'path');
-        stem.setAttribute('d', `M0,0 C ${sway},-${h*0.4} ${sway/2},-${h*0.8} 0,-${h}`);
-        stem.setAttribute('stroke','url(#stemGrad)');
-        stem.setAttribute('stroke-width','8');
-        stem.setAttribute('fill','none');
-        stem.setAttribute('stroke-linecap','round');
-        g.appendChild(stem);
-        prepStroke(stem);
-
-        // Hojas
-        const leafL = document.createElementNS(NS,'ellipse');
-        leafL.setAttribute('cx',-18); leafL.setAttribute('cy',-h*0.55);
-        leafL.setAttribute('rx',18);  leafL.setAttribute('ry',10);
-        leafL.setAttribute('fill','#7ad674');
-        leafL.setAttribute('transform','rotate(-16 -18 -120)');
-        g.appendChild(leafL);
-
-        const leafR = document.createElementNS(NS,'ellipse');
-        leafR.setAttribute('cx',18); leafR.setAttribute('cy',-h*0.72);
-        leafR.setAttribute('rx',18); leafR.setAttribute('ry',10);
-        leafR.setAttribute('fill','#6ac86f');
-        leafR.setAttribute('transform','rotate(16 18 -150)');
-        g.appendChild(leafR);
-
-        // Cabeza (tres coronas de pétalos + centro)
-        const head = document.createElementNS(NS,'g');
-        head.setAttribute('transform', `translate(0,${-h})`);
-        g.appendChild(head);
-
-        const petalsEls = [];
-        const rings = [
-          { n:16, orbit:40, r:20, l:54, offset:0 },
-          { n:12, orbit:30, r:17, l:44, offset:'shift'},
-          { n: 8, orbit:18, r:12, l:30, offset:0 }
-        ];
-        rings.forEach((ring, idx)=>{
-          for(let i=0;i<ring.n;i++){
-            const base = (Math.PI*2*i)/ring.n + (ring.offset==='shift' ? Math.PI/ring.n : 0);
-            const px = Math.cos(base)*ring.orbit, py = Math.sin(base)*ring.orbit;
-            const p  = document.createElementNS(NS,'path');
-            p.setAttribute('d', petalPath(ring.r, ring.l));
-            p.setAttribute('fill','url(#petalGrad)');
-            p.setAttribute('transform', `translate(${px},${py}) rotate(${base*180/Math.PI})`);
-            head.appendChild(p); petalsEls.push(p);
-          }
-        });
-
-        const center = document.createElementNS(NS,'circle');
-        center.setAttribute('cx',0); center.setAttribute('cy',0); center.setAttribute('r',20);
-        center.setAttribute('fill','url(#centerGrad)'); head.appendChild(center);
-
-        // Brillitos + semillas
-        const spark1 = document.createElementNS(NS,'circle');
-        spark1.setAttribute('cx',-6); spark1.setAttribute('cy',-6); spark1.setAttribute('r',3);
-        spark1.setAttribute('fill','#fff8d1'); spark1.setAttribute('opacity','.5'); head.appendChild(spark1);
-        const spark2 = document.createElementNS(NS,'circle');
-        spark2.setAttribute('cx',4); spark2.setAttribute('cy',-8); spark2.setAttribute('r',2);
-        spark2.setAttribute('fill','#fff3b0'); spark2.setAttribute('opacity','.35'); head.appendChild(spark2);
-        seedDots(head, 14);
-
-        // Animación de nacimiento por flor
-        const tl = gsap.timeline({ defaults:{ ease:'power2.out' }, delay });
-        tl.to(stem, { strokeDashoffset: 0, duration: 1.6 }, 0)
-          .from([leafL, leafR], { scale:.2, opacity:0, duration:.55, stagger:.1, transformOrigin:'50% 50%' }, 0.7)
-          .from(petalsEls, { scale:0.01, rotation:-8, opacity:0, duration:.52, stagger:.03, transformOrigin:'50% 100%' }, 0.95)
-          .from(center, { scale:.3, opacity:0, duration:.5 }, '-=0.2')
-          .to(g, { rotation:0.8, duration:3.6, ease:'sine.inOut', yoyo:true, repeat:-1, transformOrigin:'50% 100%' }, '+=0.2');
-      }
-
-      // ---------- Distribución del campo en capas (profundidad con blur) ----------
-      (function buildField(){
-        const baseY = 620, gapY = 70;
-        const configs = [
-          { rows:[10,12,10], blur:0.0, scaleBias:1.00, span:900 }, // frente
-          { rows:[ 8, 9, 8], blur:0.7, scaleBias:0.86, span:880 }, // medio
-          { rows:[ 7, 8, 7], blur:1.4, scaleBias:0.74, span:860 }  // fondo
-        ];
-        let delay = 0;
-
-        configs.forEach((cfg, li)=>{
-          cfg.rows.forEach((n, rIdx)=>{
-            const y  = baseY - (li*3 + rIdx) * (gapY*0.85);
-            const span = cfg.span - rIdx*80;
-            for(let i=0;i<n;i++){
-              const off = i - (n-1)/2;
-              const x   = 500 + off * (span/n);
-              const s   = cfg.scaleBias * (0.9 + Math.random()*0.08);
-              createFlower(x, y, s, cfg.blur, delay);
-              delay += 0.08;        // escalonado entre flores
-            }
-            delay += 0.12;          // separación entre filas
-          });
-          delay += 0.2;             // separación entre capas
-        });
-      })();
+    // Botón con interacción
+    document.querySelector('.btn').addEventListener('click', () => {
+      alert('💛 Te regalo una flor amarilla especial 💛');
     });
   </script>
 </body>
