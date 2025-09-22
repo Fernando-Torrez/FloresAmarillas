@@ -1,143 +1,336 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flores amarillas para ti</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --gold:#ffd54f;
-      --sun:#ffb300;
-      --honey:#fff2cc;
-      --cream:#fffdf5;
-      --ink:#3b3627;
-      --leaf:#6dbf57;
-      --shadow:0 10px 30px rgba(0,0,0,.08);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Quicksand',sans-serif;
-      background:linear-gradient(180deg,var(--cream) 0%,#fff9e1 60%,#fffdf5 100%);
-      color:var(--ink);
-      overflow-x:hidden;
-    }
-    .sun{
-      position:fixed;right:-100px;top:-100px;width:260px;height:260px;border-radius:50%;
-      background:radial-gradient(circle at 30% 30%,#fffbe2 0 30%,var(--gold) 31% 70%,var(--sun) 71% 100%);
-      box-shadow:0 0 140px 30px rgba(255,193,7,.35);
-      z-index:0;
-    }
-    .wrap{
-      position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:28px 16px;
-    }
-    .canvas{
-      width:min(880px,92vw);border-radius:28px;background:rgba(255,255,255,.9);
-      backdrop-filter:blur(8px);box-shadow:0 16px 50px rgba(255,193,7,.22);
-      padding:32px;animation:fadeIn .9s ease forwards;text-align:center;
-    }
-    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    h1{font-family:'Playfair Display',serif;font-size:2.2rem;color:#c07a00;margin-bottom:10px}
-    .subtitle{color:#6b5d3a;max-width:540px;margin:0 auto 20px}
+import React, { useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { gsap } from "gsap";
 
-    .garden{
-      display:flex;justify-content:center;flex-wrap:wrap;gap:40px;margin:20px 0;
-    }
-    .flower{
-      position:relative;width:120px;height:120px;
-      display:flex;align-items:center;justify-content:center;
-      animation:float 6s ease-in-out infinite;
-    }
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    .petal{
-      position:absolute;width:50px;height:80px;
-      background:radial-gradient(circle at 30% 30%,#fffcdc 0 35%,var(--gold) 36% 80%,var(--sun) 81% 100%);
-      border-radius:50%;
-      transform-origin:center bottom;
-    }
-    .flower .petal:nth-child(1){transform:rotate(0deg) translateY(-50px)}
-    .flower .petal:nth-child(2){transform:rotate(60deg) translateY(-50px)}
-    .flower .petal:nth-child(3){transform:rotate(120deg) translateY(-50px)}
-    .flower .petal:nth-child(4){transform:rotate(180deg) translateY(-50px)}
-    .flower .petal:nth-child(5){transform:rotate(240deg) translateY(-50px)}
-    .flower .petal:nth-child(6){transform:rotate(300deg) translateY(-50px)}
-    .center{
-      position:absolute;width:50px;height:50px;background:#6a4d1d;
-      border-radius:50%;z-index:2;box-shadow:inset 0 0 6px rgba(0,0,0,.4);
-    }
-    .stem{
-      position:absolute;bottom:-50px;width:6px;height:70px;background:var(--leaf);
-      border-radius:6px;z-index:-1;
-    }
+/**
+ * React — Campo de Flores Amarillas (GSAP + Three.js)
+ * - Cielo oscuro con estrellas (WebGL) + estrella fugaz
+ * - Campo completo de flores que NACE en capas (profundidad con blur sutil)
+ * - Flores rediseñadas: 3 coronas de pétalos + halo dorado + semillitas
+ * - Animaciones suaves con GSAP
+ */
 
-    .paper{
-      margin:20px auto 0;max-width:640px;
-      background:linear-gradient(180deg,#fff 0%,var(--honey) 100%);
-      border:1px solid #ffe59a;border-radius:20px;padding:22px 18px;box-shadow:var(--shadow)
+// ---------- Utilidades ----------
+const petalPath = (R = 18, L = 54) =>
+  `M 0 0 C ${R} ${-L * 0.25}, ${R * 0.78} ${-L * 0.82}, 0 ${-L} C ${-R * 0.78} ${-L * 0.82}, ${-R} ${-L * 0.25}, 0 0 Z`;
+
+const Seeds = ({ count = 14 }) => {
+  const dots = useMemo(
+    () =>
+      Array.from({ length: count }).map((_, i) => {
+        const a = Math.random() * Math.PI * 2;
+        const r = 5 + Math.random() * 9;
+        return { cx: Math.cos(a) * r, cy: Math.sin(a) * r, i };
+      }),
+    [count]
+  );
+  return (
+    <g>
+      {dots.map(({ cx, cy, i }) => (
+        <circle key={i} cx={cx} cy={cy} r={1.2} fill="#2a1b0b" />
+      ))}
+    </g>
+  );
+};
+
+// ---------- Flor individual (nuevo diseño) ----------
+const Flower: React.FC<{
+  x: number;
+  y: number;
+  scale: number;
+  delay?: number;
+  blur?: number;
+}> = ({ x, y, scale, delay = 0, blur = 0 }) => {
+  const gRef = useRef<SVGGElement | null>(null);
+  const stemRef = useRef<SVGPathElement | null>(null);
+  const leafLRef = useRef<SVGEllipseElement | null>(null);
+  const leafRRef = useRef<SVGEllipseElement | null>(null);
+  const petalsRefs = useRef<SVGPathElement[]>([]);
+  const centerRef = useRef<SVGCircleElement | null>(null);
+
+  const h = useMemo(() => 170 + Math.random() * 90, []);
+  const sway = useMemo(() => (Math.random() * 36 - 18).toFixed(1), []);
+  const outer = 16, mid = 12, inner = 8;
+  const orbitO = 40, orbitM = 30, orbitI = 18;
+
+  useEffect(() => {
+    if (!stemRef.current || !gRef.current) return;
+    const stem = stemRef.current;
+    const g = gRef.current;
+
+    const L = stem.getTotalLength();
+    stem.style.strokeDasharray = String(L);
+    stem.style.strokeDashoffset = String(L);
+
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" }, delay });
+    tl.to(stem, { strokeDashoffset: 0, duration: 1.6 }, 0)
+      .from(
+        [leafLRef.current, leafRRef.current],
+        { scale: 0.2, opacity: 0, duration: 0.55, stagger: 0.1, transformOrigin: "50% 50%" },
+        0.7
+      )
+      .from(
+        petalsRefs.current,
+        { scale: 0.01, rotation: -8, opacity: 0, duration: 0.52, stagger: 0.03, transformOrigin: "50% 100%" },
+        0.95
+      )
+      .from(centerRef.current, { scale: 0.3, opacity: 0, duration: 0.5 }, "-=0.2")
+      .to(
+        g,
+        { rotation: 0.8, duration: 3.6, ease: "sine.inOut", yoyo: true, repeat: -1, transformOrigin: "50% 100%" },
+        "+=0.2"
+      );
+
+    return () => { tl.kill(); };
+  }, [delay]);
+
+  const setPetalRef = (el: SVGPathElement | null, idx: number) => {
+    if (el) petalsRefs.current[idx] = el;
+  };
+
+  return (
+    <g
+      ref={gRef}
+      transform={`translate(${x},${y}) scale(${scale})`}
+      style={{ filter: blur ? `blur(${blur}px)` : undefined }}
+    >
+      {/* Halo dorado suave */}
+      <g opacity={0.2}>
+        <circle cx={0} cy={-h} r={44} fill="#ffdf80" />
+        <circle cx={0} cy={-h} r={72} fill="#ffdf80" opacity={0.22} />
+      </g>
+
+      {/* Tallo */}
+      <path
+        ref={stemRef}
+        d={`M0,0 C ${sway},-${h * 0.4} ${Number(sway) / 2},-${h * 0.8} 0,-${h}`}
+        stroke="url(#stemGrad)"
+        strokeWidth={8}
+        fill="none"
+        strokeLinecap="round"
+      />
+
+      {/* Hojas */}
+      <ellipse ref={leafLRef} cx={-18} cy={-h * 0.55} rx={18} ry={10} fill="#7ad674" transform="rotate(-16 -18 -120)" />
+      <ellipse ref={leafRRef} cx={18} cy={-h * 0.72} rx={18} ry={10} fill="#6ac86f" transform="rotate(16 18 -150)" />
+
+      {/* Cabeza: 3 coronas de pétalos */}
+      <g transform={`translate(0,${-h})`}>
+        {[{ n: outer, orbit: orbitO, r: 20, l: 54, op: 1 },
+          { n: mid,   orbit: orbitM, r: 17, l: 44, op: .95 },
+          { n: inner, orbit: orbitI, r: 12, l: 30, op: .9 }].map((ring, ringIdx) => (
+          <g key={ringIdx} opacity={ring.op}>
+            {Array.from({ length: ring.n }).map((_, i) => {
+              const a = (Math.PI * 2 * i) / ring.n + (ringIdx === 1 ? Math.PI / ring.n : 0);
+              const px = Math.cos(a) * ring.orbit, py = Math.sin(a) * ring.orbit;
+              const idx = (ringIdx === 0 ? 0 : ringIdx === 1 ? outer : outer + mid) + i;
+              return (
+                <path
+                  key={`ring-${ringIdx}-${i}`}
+                  ref={(el) => setPetalRef(el, idx)}
+                  d={petalPath(ring.r, ring.l)}
+                  fill="url(#petalGrad)"
+                  transform={`translate(${px},${py}) rotate(${(a * 180) / Math.PI})`}
+                />
+              );
+            })}
+          </g>
+        ))}
+        {/* Centro + brillos + semillas */}
+        <circle ref={centerRef} cx={0} cy={0} r={20} fill="url(#centerGrad)" />
+        <circle cx={-6} cy={-6} r={3} fill="#fff8d1" opacity={0.5} />
+        <circle cx={4} cy={-8} r={2} fill="#fff3b0" opacity={0.35} />
+        <Seeds count={14} />
+      </g>
+    </g>
+  );
+};
+
+// ---------- Cielo 3D ----------
+const Stars3D: React.FC = () => {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const mount = mountRef.current!;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mount.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    camera.position.z = 5;
+
+    const starCount = 1600;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = 38 * Math.random() + 6;
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      positions[i * 3 + 0] = r * Math.sin(ph) * Math.cos(th);
+      positions[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
+      positions[i * 3 + 2] = r * Math.cos(ph);
     }
-    .paper p{margin:.8rem 0;line-height:1.8}
-    .paper em{color:#c77800;font-style:normal;font-weight:700}
-    .foot{margin-top:20px;font-size:.95rem;color:#7a6a3c;opacity:.9}
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.02, transparent: true, opacity: 0.85 });
+    const stars = new THREE.Points(geo, mat);
+    scene.add(stars);
 
-    .fall{position:fixed;top:-40px;width:14px;height:14px;pointer-events:none;z-index:3;opacity:.95}
-    .fall::before{content:\"\";position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,#fffadc 0 35%,var(--gold) 36% 80%,var(--sun) 81% 100%);border-radius:50%;filter:drop-shadow(0 2px 6px rgba(0,0,0,.08));}
-  </style>
-</head>
-<body>
-  <div class="sun"></div>
-  <div class="wrap">
-    <section class="canvas">
-      <h1>Flores amarillas para ti 🌼</h1>
-      <p class="subtitle">Aunque no pueda darte flores en persona, quiero que sepas que te las mando de esta manera: en un jardín digital hecho sólo para ti, porque eres realmente especial.</p>
+    function onResize() {
+      const w = mount.clientWidth || window.innerWidth;
+      const h = mount.clientHeight || window.innerHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", onResize);
+    onResize();
 
-      <div class="garden">
-        <div class="flower">
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="center"></div>
-          <div class="stem"></div>
-        </div>
-        <div class="flower">
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="center"></div>
-          <div class="stem"></div>
-        </div>
-        <div class="flower">
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-          <div class="center"></div>
-          <div class="stem"></div>
-        </div>
+    let raf: number;
+    const loop = () => {
+      stars.rotation.y += 0.0005;
+      stars.rotation.x += 0.00025;
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onResize);
+      mount.removeChild(renderer.domElement);
+      renderer.dispose();
+      geo.dispose();
+      mat.dispose();
+    };
+  }, []);
+  return <div ref={mountRef} style={{ position: "fixed", inset: 0, zIndex: -10 }} />;
+};
+
+// ---------- Página ----------
+export default function CampoDeFlores() {
+  // Estrella fugaz
+  useEffect(() => {
+    const spawn = () => {
+      const m = document.createElement("div");
+      Object.assign(m.style, {
+        position: "fixed", left: "-10vw", top: "-10vh",
+        width: "2px", height: "2px", background: "#fff", borderRadius: "50%",
+        boxShadow: "0 0 10px 3px #fff, 0 0 20px 8px rgba(255,255,255,.55)",
+        zIndex: 20, opacity: 0.95
+      });
+      document.body.appendChild(m);
+      const sx = -10 + Math.random() * 10;
+      const sy = 5 + Math.random() * 22;
+      m.style.left = sx + "vw";
+      m.style.top = sy + "vh";
+      gsap.fromTo(m, { x: 0, y: 0, opacity: 0.95 }, {
+        x: "120vw", y: "85vh", opacity: 0, duration: 2.3, ease: "power2.out",
+        onComplete: () => m.remove()
+      });
+    };
+    const t1 = setTimeout(spawn, 1600);
+    const int = setInterval(() => { if (Math.random() > 0.6) spawn(); }, 10000);
+    return () => { clearTimeout(t1); clearInterval(int); };
+  }, []);
+
+  // Capas del campo (profundidad)
+  const layers = useMemo(() => {
+    const baseY = 620; const gapY = 70;
+    const configs = [
+      { rows: [10, 12, 10], blur: 0,   scaleBias: 1.0,  span: 900 }, // frente
+      { rows: [8,  9,  8],  blur: 0.7, scaleBias: 0.86, span: 880 }, // medio
+      { rows: [7,  8,  7],  blur: 1.4, scaleBias: 0.74, span: 860 }, // fondo
+    ];
+    const out: { x:number; y:number; s:number; delay:number; blur:number }[] = [];
+    let globalDelay = 0;
+    configs.forEach((cfg, li) => {
+      cfg.rows.forEach((n, rIdx) => {
+        const y = baseY - (li * 3 + rIdx) * (gapY * 0.85);
+        const span = cfg.span - rIdx * 80;
+        for (let i = 0; i < n; i++) {
+          const off = i - (n - 1) / 2;
+          const x = 500 + off * (span / n);
+          const s = cfg.scaleBias * (0.9 + Math.random() * 0.08);
+          out.push({ x, y, s, delay: globalDelay, blur: cfg.blur });
+          globalDelay += 0.08;
+        }
+        globalDelay += 0.12;
+      });
+      globalDelay += 0.2;
+    });
+    return out;
+  }, []);
+
+  return (
+    <div
+      className="relative min-h-screen overflow-hidden"
+      style={{
+        color: "#eaf0ff",
+        background:
+          "radial-gradient(85% 55% at 50% 0%, #060915 0%, transparent 70%), linear-gradient(180deg, #04050a 0%, #02030a 100%)",
+      }}
+    >
+      <Stars3D />
+
+      {/* Frase */}
+      <header
+        style={{
+          position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
+          zIndex: 30, width: "min(960px,92vw)", textAlign: "center"
+        }}
+      >
+        <h1 style={{ fontFamily: "Playfair Display, serif", margin: 0, fontSize: "clamp(1.7rem,3.2vw,2.6rem)", letterSpacing: ".2px" }}>
+          Un campo de flores que nace para ti — y tú brillas como el amarillo en la noche
+        </h1>
+        <p style={{ marginTop: 8, color: "#b7c2dd", maxWidth: "72ch", marginInline: "auto" }}>
+          No puedo llevarte flores en persona; por eso te regalo este <span style={{ fontWeight: 600, color: "#ffd66e" }}>campo que nace</span>.
+          En el cielo oscuro, tu luz amarilla lo enciende todo.
+        </p>
+      </header>
+
+      {/* Campo de flores */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 10, display: "grid", placeItems: "end", paddingBottom: "5vh" }}>
+        <svg viewBox="0 0 1000 700" style={{ width: "min(1400px,96vw)", height: "min(78vh,80vw)", overflow: "visible" }}>
+          <defs>
+            <radialGradient id="petalGrad" cx="30%" cy="30%" r="70%">
+              <stop offset="0%"  stopColor="#fff6c7" />
+              <stop offset="52%" stopColor="#ffe48f" />
+              <stop offset="86%" stopColor="#ffd04a" />
+              <stop offset="100%" stopColor="#ffb300" />
+            </radialGradient>
+            <radialGradient id="centerGrad" cx="50%" cy="45%" r="60%">
+              <stop offset="0%"  stopColor="#8b5a2b" />
+              <stop offset="100%" stopColor="#332312" />
+            </radialGradient>
+            <linearGradient id="stemGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stopColor="#7ad674" />
+              <stop offset="100%" stopColor="#49b262" />
+            </linearGradient>
+          </defs>
+
+          {layers.map(({ x, y, s, delay, blur }, idx) => (
+            <Flower key={idx} x={x} y={y} scale={s} delay={delay} blur={blur} />
+          ))}
+        </svg>
       </div>
 
-      <article class="paper">
-        <p>Quizá no pueda acercarme con un ramo real, pero aquí tienes <em>flores amarillas</em> que no se marchitan. 🌻</p>
-        <p>Dicen que son símbolo de alegría, de esperanza y de cariño sincero. Hoy te las regalo así, digitales pero llenas de intención, para recordarte lo especial que eres.</p>
-        <p>Ojalá estas flores iluminen tu día tanto como tu sonrisa ilumina el mío. 💛</p>
-      </article>
+      {/* Niebla/suelo */}
+      <div
+        style={{
+          position: "fixed", left: 0, right: 0, bottom: 0, height: "42vh", zIndex: 0,
+          background: "radial-gradient(100% 70% at 50% 100%, rgba(10,16,32,.9) 0%, rgba(10,16,32,0) 70%)",
+          filter: "blur(8px)"
+        }}
+      />
 
-      <p class="foot">Un jardín digital, sólo para ti ✨</p>
-    </section>
-  </div>
-
-  <script>
-    function petals(count=20){
-      for(let i=0;i<count;i++){
-        const f=document.createElement('div');
-        f.className='fall';
-        f.style.left=Math.random()*100+'vw';
-        const drift=(Math.random()*30-15).toFixed(2);
-        f.animate([
-          { transform:`translateY(-60px) rotate(0deg)`, opacity:.95 },
-          { transform:`translate(${drift}vw, 110vh) rotate(${120+Math.random()*120}deg)`, opacity:0 }
-        ],{duration:6000+Math.random()*3000,easing:'cubic-bezier(.25,.6,.3,1)',delay:Math.random()*1000});
-        document.body.appendChild(f);
-        setTimeout(()=>f.remove(),10000);
-      }
-    }
-    setInterval(()=>petals(6),1500);
-    setTimeout(()=>petals(20),600);
-  </script>
-</body>
-</html>
+      <footer
+        style={{
+          position: "fixed", bottom: 12, left: "50%", transform: "translateX(-50%)",
+          zIndex: 30, color: "#cfd8ff", opacity: .85, fontSize: ".95rem"
+        }}
+      >
+        Hecho con cariño bajo un cielo de estrellas ✨
+      </footer>
+    </div>
+  );
+}
